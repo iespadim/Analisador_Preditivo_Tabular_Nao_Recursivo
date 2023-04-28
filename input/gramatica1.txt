@@ -1,0 +1,1 @@
+esta é uma gramatica de teste para o trabalho de compiladores
