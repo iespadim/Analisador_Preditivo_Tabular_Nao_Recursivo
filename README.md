@@ -1,4 +1,15 @@
 ## Classes e arquitetura do projeto:
+entrada: uma gramática G definida por uma quádrupla:
+
+  G = ( N, T, P, S ), onde:
+
+  - N) conjunto finito de não-terminais (ou variáveis)
+
+  - T) - conjunto finito de terminais
+
+  - P) - conjunto finito de regras de produção
+
+  - S) - símbolo inicial da gramática
 
 ### Classe app
 * Interface de entrada da gramatica

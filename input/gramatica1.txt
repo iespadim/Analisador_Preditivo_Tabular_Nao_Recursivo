@@ -1,1 +1,6 @@
-esta é uma gramatica de teste para o trabalho de compiladores
+G = ({E, T, E´}, {+, a}, P, E)
+P: {
+     E -> TE’
+     E’-> +TE’ | 
+     T -> a
+     }
