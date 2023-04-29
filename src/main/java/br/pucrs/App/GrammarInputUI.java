@@ -1,4 +1,4 @@
-package br.pucrs;
+package br.pucrs.App;
 
 import javax.swing.*;
 import java.awt.*;
