@@ -1,4 +1,4 @@
-package br.pucrs.App;
+package app;
 
 import negocio.Gramatica;
 
