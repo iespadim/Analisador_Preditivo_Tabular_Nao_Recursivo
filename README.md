@@ -1,36 +1,36 @@
+sentença vazia: ε
+
 ## Classes e arquitetura do projeto:
 entrada: uma gramática G definida por uma quádrupla:
 
   G = ( N, T, P, S ), onde:
-
   - N) conjunto finito de não-terminais (ou variáveis)
-
   - T) - conjunto finito de terminais
-
   - P) - conjunto finito de regras de produção
-
   - S) - símbolo inicial da gramática
 
-### Classe app
-* Interface de entrada da gramatica
-* entradas:
+### Classe app ✔ 
+* Interface de entrada da gramatica ✔
+* entradas:✔ 
+* mostra tabela com produções
 * gera tabela de analise
+* 
 
 
 ### Classe gramatica
-* armazenar a gramática e verificar se ela é LL.
-* leGramatica()
-* verificaLL()
-* adicionar produções,
-* adicionaProdução(arg simbolo_não_terminal)
+* armazenar a gramática e verificar se ela é LL. ✔
+* leGramatica() ✔
+* verificaLL() ✔ 
+* adicionar produções,✔ 
+* adicionaProdução(arg simbolo_não_terminal)✔ 
 * calcular os conjuntos FIRST e FOLLOW,
 * first(arg simbolo_não_terminal)
 * follow(arg simbolo_não_terminal)
 
 
-### Classe produção
-* representa uma produção da gramática.
-* informações sobr simbolo a esquerda e a lista de símbolos à direita
+### ~Classe produção~ ❌ Não será usada, as produções estão representadas em um Hashmap(key naoTerminal,value Arraylist<String> Produções) dentro da classe gramatica
+~* representa uma produção da gramática.~
+~* informações sobr simbolo a esquerda e a lista de símbolos à direita~
 
 ### Classe tabelaPreditiva
 * constroi a tabela de análise preditiva tabular
