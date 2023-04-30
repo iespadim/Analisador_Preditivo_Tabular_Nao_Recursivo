@@ -1,5 +1,5 @@
 G3 = ({A, B}, {a, b}, P, A)
-P:{
- A -> A a | a B | a b
- B -> b
+P: {
+	A -> A a | a B | a b
+	B -> b
 }
