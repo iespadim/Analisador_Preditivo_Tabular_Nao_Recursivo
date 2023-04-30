@@ -46,10 +46,10 @@ entrada: uma gramática G definida por uma quádrupla:
 roteiro de execução do programa
 
 
-* ler a gramatica
-* verificar se é LL 
-  * verificar se nao possui recursao a esquerda
-  * verificar se é fatoravel
+* ler a gramatica ✔
+* verificar se é LL ✔
+  * verificar se nao possui recursao a esquerda✔
+  * verificar se é fatoravel ✔
 * criar conjuntos first e follow
 * montar tabela preditiva tabular
   * criar uma tabela sendo as linhas os nao terminais e as colunas os terminais + $
