@@ -1,7 +1,7 @@
 package app;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -13,16 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 
 public class GrammarInputUI extends JFrame {
     private JTextArea grammarInput;
@@ -37,7 +27,7 @@ public class GrammarInputUI extends JFrame {
 
         // Painel para entrada de gramática
         JPanel grammarPanel = new JPanel(new BorderLayout());
-        grammarInput = new JTextArea(10, 0);
+        grammarInput = new JTextArea(10,0);
         grammarPanel.add(new JLabel("Escreva aqui sua gramática:"), BorderLayout.NORTH);
         grammarPanel.add(new JScrollPane(grammarInput), BorderLayout.CENTER);
 
@@ -103,7 +93,7 @@ public class GrammarInputUI extends JFrame {
                 }
             }
 
-            // processGrammar(grammar);
+           //processGrammar(grammar);
             callback.accept(grammar);
             dispose();
         }
@@ -118,6 +108,8 @@ public class GrammarInputUI extends JFrame {
     public static void main(String[] args) {
         Consumer<String> oi = (String s) -> System.out.println(s);
 
-        SwingUtilities.invokeLater(() -> new GrammarInputUI(oi));
+        SwingUtilities.invokeLater
+                (() -> new GrammarInputUI(oi ));
     }
 }
+

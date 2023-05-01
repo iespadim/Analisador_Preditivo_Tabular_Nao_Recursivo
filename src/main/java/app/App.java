@@ -1,36 +1,35 @@
 package app;
 
+import negocio.Gramatica;
+
+import javax.swing.*;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.SwingUtilities;
-
-import negocio.Grammar;
-
 public class App {
-    private static Grammar grammar;
-    static String nameGrammar = "";
+    private static Gramatica gramatica;
+    static String stringGramatica = "";
 
     public static void main(String[] args) {
         desenhaApp();
         montaGramatica();
-        validateGrammar();
+        verificaGramaticaLL();
     }
 
-    private static void validateGrammar() {
-        if (grammar.validateGrammar()) {
+    private static void verificaGramaticaLL() {
+        if(gramatica.verificaGramaticaLL()){
             System.out.println("Gramatica é LL");
         }
     }
 
     private static void montaGramatica() {
-        grammar = new Grammar(nameGrammar);
+        gramatica = new Gramatica(stringGramatica);
     }
 
     public static void desenhaApp() {
         CountDownLatch latch = new CountDownLatch(1);
 
         SwingUtilities.invokeLater(() -> new GrammarInputUI((String s) -> {
-            nameGrammar = s;
+            stringGramatica = s;
             latch.countDown();
         }));
 

@@ -1,4 +1,4 @@
-G = ({X, Y, Z}, {a, b, c, d, e}, P, S)
+G = ({X, Y, Z},{a, b, c, d, e}, P, S)
 P: {
     S -> XYZ
     X -> aXb | ε
