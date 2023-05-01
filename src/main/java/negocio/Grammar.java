@@ -1,6 +1,9 @@
 package negocio;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,10 +17,10 @@ public class Grammar {
      * S) símbolo inicial da gramática
      */
 
-    String name;
+    String grammarName;
     ArrayList<Symbol> symbols;
     ArrayList<Production> productions;
-    String symbolInicial;
+    String startSymbol;
 
     public Grammar(String grammar) {
         this.symbols = new ArrayList<Symbol>();
@@ -37,31 +40,35 @@ public class Grammar {
         Matcher matcher = pattern.matcher(grammarStr);
 
         if (matcher.matches()) {
-            String name = matcher.group(1);
-            String nonTerminals = matcher.group(2);
-            String terminals = matcher.group(3);
-            String productions = matcher.group(4);
-            String startSymbol = matcher.group(5);
+            String name_ = matcher.group(1);
+            String nonTerminals_ = matcher.group(2);
+            String terminals_ = matcher.group(3);
+            String productions_ = matcher.group(4);
+            String startSymbol_ = matcher.group(5);
 
-            System.out.println("Grammar name: " + name);
-            this.name = name;
+            System.out.println("Grammar name: " + name_);
+            grammarName = name_;
 
-            System.out.println("Non-terminals: " + nonTerminals);
-            String[] nonTerminalsArray = nonTerminals.split(",\\s*");
+            System.out.println("Non-terminals: " + nonTerminals_);
+            String[] nonTerminalsArray = nonTerminals_.split(",\\s*");
             for (String nonTerminal : nonTerminalsArray) {
                 symbols.add(new Symbol(nonTerminal, false));
             }
 
-            System.out.println("Terminals: " + terminals);
-            String[] terminalsArray = terminals.split(",\\s*");
+            System.out.println("Terminals: " + terminals_);
+            String[] terminalsArray = terminals_.split(",\\s*");
             for (String terminal : terminalsArray) {
                 symbols.add(new Symbol(terminal, true));
             }
 
-            System.out.println("Productions: " + productions);
+            System.out.println("Start symbol: " + startSymbol_);
+            startSymbol = startSymbol_; // Store the start symbol
+            productions.add(new Production(new Symbol(startSymbol_, false), new ArrayList<Symbol>())); // Add the start symbol to the productions
+
+            System.out.println("Productions: " + productions_);
             validateProductions(lines);
 
-            System.out.println("Start symbol: " + startSymbol);
+
         } else {
             System.out.println("Invalid grammar string");
         }
@@ -85,12 +92,17 @@ public class Grammar {
                 rightSymbols.add(new Symbol(prod.trim(), true));
             }
 
-            this.productions.add(new Production(leftSymbol, rightSymbols));
+            for (int j = 0; j < productions.size() ; j++) {
+                if (productions.get(j).getLeft().equals(leftSymbol)) {
+                    productions.get(j).getRight().addAll(rightSymbols);
+                    break;
+                }
+            }
         }
     }
 
     public boolean validateGrammar() {
-        boolean temRecursaoEsquerda = validateRecursion();
+        boolean temRecursaoEsquerda = verificaRecursaoEsquerda();
         boolean eFatoravel = verificaFatoravel();
 
         if (temRecursaoEsquerda || eFatoravel) {
@@ -106,39 +118,84 @@ public class Grammar {
         }
     }
 
-    private boolean validateRecursion() {
+    private boolean verificaRecursaoEsquerda() {
         for (Production production : this.productions) {
-            Symbol left = production.getLeft();
-            ArrayList<Symbol> rights = production.getRight();
-            System.out.println(rights);
-
-            for (Symbol right : rights) {
-                System.out.println(right);
-                if (left.equals(right)) {
-                    System.out.println("Recursão à esquerda");
+            Symbol leftSymbol = production.getLeft();
+            for (Symbol rightSymbol : production.getRight()) {
+                if (rightSymbol.isTerminal()) {
+                    continue;
+                }
+                Symbol nonTerminalRightSymbol = getNonTerminalByName(rightSymbol.getName());
+                if (leftSymbol.equals(nonTerminalRightSymbol)) {
+                    // Recursão à esquerda direta
                     return true;
+                } else {
+                    // Verificar a recursão à esquerda indireta
+                    if (hasIndirectLeftRecursion(leftSymbol, nonTerminalRightSymbol, new HashSet<>())) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    private boolean verificaFatoravel() {
-        // for (Production production : this.productions) {
-        // Symbol left = production.getLeft();
-        // ArrayList<Symbol> rights = production.getRight();
+    private boolean hasIndirectLeftRecursion(Symbol leftSymbol, Symbol rightSymbol, Set<Symbol> visited) {
+        if (visited.contains(rightSymbol)) {
+            return false;
+        }
+        visited.add(rightSymbol);
 
-        // Set<Symbol> symbolsSeen = new HashSet<>();
-        // for (Symbol symbol : this.rights) {
-        // if (symbolsSeen.contains(symbol)) {
-        // return true;
-        // }
-        // symbolsSeen.add(symbol);
-        // }
-        // }
-        // return false;
+        for (Production production : this.productions) {
+            if (production.getLeft().equals(rightSymbol)) {
+                for (Symbol nextSymbol : production.getRight()) {
+                    if (nextSymbol.isTerminal()) {
+                        continue;
+                    }
+                    Symbol nonTerminalNextSymbol = getNonTerminalByName(nextSymbol.getName());
+                    if (leftSymbol.equals(nonTerminalNextSymbol)) {
+                        return true;
+                    }
+                    if (hasIndirectLeftRecursion(leftSymbol, nonTerminalNextSymbol, visited)) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
+
+    private Symbol getNonTerminalByName(String name) {
+        for (Symbol symbol : this.symbols) {
+            if (!symbol.isTerminal() && symbol.getName().equals(name)) {
+                return symbol;
+            }
+        }
+        return null;
+    }
+
+
+
+
+    private boolean verificaFatoravel() {
+        for (Production production : this.productions) {
+            ArrayList<Symbol> rights = production.getRight();
+            int n = rights.size();
+            for (int i = 0; i < n - 1; i++) {
+                Symbol symbol1 = rights.get(i);
+                String prefix1 = symbol1.getName().substring(0, 1);
+                for (int j = i + 1; j < n; j++) {
+                    Symbol symbol2 = rights.get(j);
+                    String prefix2 = symbol2.getName().substring(0, 1);
+                    if (prefix1.equals(prefix2)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     private ArrayList<Symbol> getSymbols(Boolean type) {
         ArrayList<Symbol> symbols = new ArrayList<Symbol>();
