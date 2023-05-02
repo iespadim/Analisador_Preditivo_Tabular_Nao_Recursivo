@@ -19,7 +19,7 @@ public class App {
 
     private static void criaConjuntoFirstEFollow() {
         gramatica.gerarFirst();
-//        //gramatica.calcularConjuntoFollow();
+        gramatica.gerarFollow();
         gramatica.exibirFirstFollow();
     }
 

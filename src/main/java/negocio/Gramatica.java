@@ -3,6 +3,7 @@ package negocio;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static negocio.Symbol.EPSILON;
 
@@ -20,8 +21,8 @@ public class Gramatica {
     ArrayList<Symbol> naoTerminais;
     ArrayList<Symbol> terminais;
 
-    HashMap<Symbol, List<Symbol>> conjuntoFirst;
-    HashMap<Symbol, List<Symbol>> conjuntoFollow;
+    HashMap<String, List<Symbol>> conjuntoFirst;
+    HashMap<String, List<Symbol>> conjuntoFollow;
 
     HashMap<String, ArrayList<List<Symbol>>> producoes;
     // hashmap onde cada chave tem diversas produção;
@@ -35,16 +36,16 @@ public class Gramatica {
 
         validaGramatica(stringGramatica);
 
-        conjuntoFirst = new HashMap<Symbol, List<Symbol>>();
-        conjuntoFollow = new HashMap<Symbol, List<Symbol>>();
+        conjuntoFirst = new HashMap<String, List<Symbol>>();
+        conjuntoFollow = new HashMap<String, List<Symbol>>();
         inicializaFirstFollow();
 
     }
 
     private void inicializaFirstFollow() {
         for (Symbol naoTerminal : naoTerminais) {
-            conjuntoFirst.put(naoTerminal, new LinkedList<Symbol>());
-            conjuntoFollow.put(naoTerminal, new LinkedList<Symbol>());
+            conjuntoFirst.put(naoTerminal.toString(), new LinkedList<Symbol>());
+            conjuntoFollow.put(naoTerminal.toString(), new LinkedList<Symbol>());
         }
     }
 
@@ -216,12 +217,12 @@ public class Gramatica {
     public void exibirFirstFollow() {
         System.out.println("Conjuntos FIRST:");
         for (Symbol naoTerminal : naoTerminais) {
-            System.out.println("FIRST(" + naoTerminal.toString() + "): " + conjuntoFirst.get(naoTerminal).toString());
+            System.out.println("FIRST(" + naoTerminal.toString() + "): " + conjuntoFirst.get(naoTerminal.toString()).toString());
         }
 
         System.out.println("\nConjuntos FOLLOW:");
         for (Symbol naoTerminal : naoTerminais) {
-            System.out.println("FOLLOW(" + naoTerminal.toString() + "): " + conjuntoFollow.get(naoTerminal).toString());
+            System.out.println("FOLLOW(" + naoTerminal.toString() + "): " + conjuntoFollow.get(naoTerminal.toString()).toString());
         }
     }
 
@@ -230,7 +231,7 @@ public class Gramatica {
     public void gerarFirst() {
         // percorre os não-terminais
         for (Symbol naoTerminal : naoTerminais) {
-            conjuntoFirst.put(naoTerminal, gerarFirst(naoTerminal));
+            conjuntoFirst.put(naoTerminal.toString(), gerarFirst(naoTerminal));
             //gerarFirst(naoTerminal);
         }
     }
@@ -241,54 +242,26 @@ public class Gramatica {
 
         // percorre as produções do não-terminal
         for (List<Symbol> producao : producoes.get(naoTerminal.toString())) {
+            int pos = 0;
+            boolean shouldContinue = true;
 
-            // verifica se a produção começa com um terminal
-            Symbol prod1_ = producao.get(0);
-            if (prod1_.isTerminal()) {
-                first.add(prod1_);
-            } else {
-                //começa com um não terminal
-                //percorre as produções do não terminal
-                //e adiciona o first das produções ao first do não terminal atual
-                for (List<Symbol> producao2_ : producoes.get(prod1_.toString())) {
-                    if (producao2_.get(0).isTerminal()) {
-                        first.add(producao2_.get(0));
+            while (pos < producao.size() && shouldContinue) {
+                Symbol currentSymbol = producao.get(pos);
+
+                if (currentSymbol.isTerminal() || currentSymbol.equals(EPSILON)) {
+                    first.add(currentSymbol);
+                    shouldContinue = false;
+                } else {
+                    List<Symbol> firstOfCurrentSymbol = gerarFirst(currentSymbol);
+
+                    if (firstOfCurrentSymbol.contains(EPSILON)) {
+                        first.addAll(firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON)).collect(Collectors.toList()));
                     } else {
-                        if(producao2_.size()>1){
-                            if (!producao2_.get(1).isTerminal()) {
-                                List<Symbol> prod3 = producao2_.subList(1, producao2_.size());
-                                first.addAll(gerarFirst(prod3.get(0)));
-                            } else {
-                                first.add(producao2_.get(1));
-                            }
-                        }
+                        first.addAll(firstOfCurrentSymbol);
+                        shouldContinue = false;
                     }
                 }
-                //CHECA SE O PROXIMO TAMBÉM É NAO TERMINAL
-                // SE FOR NAO TERMINAL, PEGA O FIRST DELE
-                if(producao.size()>1) {
-                    if (!producao.get(1).isTerminal()) {
-                        List<Symbol> prod2 = producao.subList(1, producao.size());
-                        System.out.println("Gerando FIRST(" + prod2.get(0).toString() + ")");
-                        first.addAll(gerarFirst(prod2.get(0)));
-                        if(producao.size()>2) {
-                            if (!producao.get(2).isTerminal()) {
-                                List<Symbol> prod3 = producao.subList(2, producao.size());
-                                System.out.println("Gerando FIRST(" + prod3.get(0).toString() + ")");
-                                first.addAll(gerarFirst(prod3.get(0)));
-                                if(producao.size()>3) {
-                                    if (!producao.get(3).isTerminal()) {
-                                        List<Symbol> prod4 = producao.subList(3, producao.size());
-                                        System.out.println("Gerando FIRST(" + prod4.get(0).toString() + ")");
-                                        first.addAll(gerarFirst(prod3.get(0)));
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
+                pos++;
             }
         }
         return first;
@@ -297,55 +270,60 @@ public class Gramatica {
 
 
 
-//    public void calcularConjuntoFollow() {
-//        for (String naoTerminal : naoTerminais) {
-//            conjuntoFollow.put(naoTerminal, new HashSet<String>());
-//        }
-//        conjuntoFollow.get(simboloInicial).add("$");
-//
-//        boolean mudouConjuntoFollow = true;
-//        while (mudouConjuntoFollow) {
-//            mudouConjuntoFollow = false;
-//
-//            for (String naoTerminal : naoTerminais) {
-//                for (String outroNaoTerminal : naoTerminais) {
-//                    for (String producao : producoes.get(outroNaoTerminal)) {
-//                        String[] tokens = producao.split("\\s+");
-//
-//                        for (int i = 0; i < tokens.length; i++) {
-//                            if (tokens[i].equals(naoTerminal)) {
-//                                if (i == tokens.length - 1) {
-//                                    if (mudouConjuntoFollow
-//                                            || conjuntoFollow.get(naoTerminal).addAll(conjuntoFollow.get(outroNaoTerminal))) {
-//                                        mudouConjuntoFollow = true;
-//                                    }
-//                                } else {
-//                                    HashSet<String> conjuntoFirstProximoToken = new HashSet<String>();
-//                                    boolean podeDerivarVazio = true;
-//
-//                                    for (int j = i + 1; j < tokens.length && podeDerivarVazio; j++) {
-//                                        HashSet<String> conjuntoFirstToken = conjuntoFirst.get(tokens[j]);
-//                                        conjuntoFirstProximoToken.addAll(conjuntoFirstToken);
-//                                        podeDerivarVazio = conjuntoFirstToken.contains("ε");
-//                                    }
-//
-//                                    if (podeDerivarVazio) {
-//                                        if (mudouConjuntoFollow
-//                                                || conjuntoFollow.get(naoTerminal).addAll(conjuntoFollow.get(outroNaoTerminal))) {
-//                                            mudouConjuntoFollow = true;
-//                                        }
-//                                    }
-//
-//                                    if (mudouConjuntoFollow
-//                                            || conjuntoFollow.get(naoTerminal).addAll(conjuntoFirstProximoToken)) {
-//                                        mudouConjuntoFollow = true;
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+    public void gerarFollow() {
+        // Inicializa o conjunto FOLLOW do símbolo inicial com o símbolo delimitador $
+        conjuntoFollow.get(simboloInicial).add(new Symbol("$", true));
+
+        boolean mudou;
+        int maxIteracoes = 10; // Define o limite máximo de iterações
+        int iteracaoAtual = 0;
+        do {
+            mudou = false;
+            iteracaoAtual++; // Incrementa a contagem de iterações
+            for (Symbol naoTerminal : naoTerminais) {
+                ArrayList<List<Symbol>> producoesNaoTerminal = producoes.get(naoTerminal.toString());
+                for (List<Symbol> producao : producoesNaoTerminal) {
+                    for (int i = 0; i < producao.size(); i++) {
+                        Symbol simbolo = producao.get(i);
+                        if (!simbolo.isTerminal()) {
+                            List<Symbol> followSimbolo = conjuntoFollow.get(simbolo.toString());
+                            int prevSize = followSimbolo.size();
+                            if (i < producao.size() - 1) {
+                                Symbol proxSimbolo = producao.get(i + 1);
+                                if (proxSimbolo.isTerminal()) {
+                                    followSimbolo.add(proxSimbolo);
+                                } else {
+                                    List<Symbol> firstProxSimbolo = conjuntoFirst.get(proxSimbolo.toString());
+                                    followSimbolo.addAll(firstProxSimbolo.stream().filter(s -> !s.toString().equals(EPSILON.toString())).collect(Collectors.toList()));
+                                    if (firstProxSimbolo.toString().contains(EPSILON.toString())) {
+                                        followSimbolo.addAll(conjuntoFollow.get(proxSimbolo.toString()));
+                                    }
+                                }
+                            } else {
+                                followSimbolo.addAll(conjuntoFollow.get(naoTerminal.toString()));
+                            }
+                            if (prevSize != followSimbolo.size()) {
+                                mudou = true;
+                            }
+                        }
+                    }
+                }
+            }
+            // Interrompe o loop se o limite máximo de iterações for atingido
+            if (iteracaoAtual >= maxIteracoes) {
+                System.out.println("Limite máximo de iterações atingido. Interrompendo o loop.");
+                break;
+            }
+        } while (mudou);
+
+        //remove duplicados do conjunto follow
+        for (Symbol naoTerminal : naoTerminais) {
+            List<Symbol> follow = conjuntoFollow.get(naoTerminal.toString());
+            conjuntoFollow.put(naoTerminal.toString(), follow.stream().distinct().collect(Collectors.toList()));
+        }
+    }
+
+
+
 }
 
