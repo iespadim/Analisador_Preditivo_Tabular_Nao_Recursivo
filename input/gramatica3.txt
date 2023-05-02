@@ -1,8 +1,8 @@
-G = ({H, H’, T, T’, F }, { +, *, (, ), id }, P, E)
+G = ({J,E’,T,T’,F},{+,*,(,),id}, P, E)
 P: {
- H-> TH’
- H’ -> +TH’ | E
+ J -> TE’
+ E’ -> +TE’ | E
  T -> FT’
  T’ -> *FT’ | E
- F -> ( H ) | id
+ F -> ( J ) | id
  }

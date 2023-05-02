@@ -236,6 +236,7 @@ public class Gramatica {
     }
 
     private List<Symbol> gerarFirst(Symbol naoTerminal) {
+        System.out.println("Gerando FIRST(" + naoTerminal.toString() + ")");
         List<Symbol> first = new LinkedList<Symbol>();
 
         // percorre as produções do não-terminal
@@ -253,14 +254,46 @@ public class Gramatica {
                     if (producao2_.get(0).isTerminal()) {
                         first.add(producao2_.get(0));
                     } else {
-                        first.addAll(gerarFirst(producao2_.get(0)));
+                        if(producao2_.size()>1){
+                            if (!producao2_.get(1).isTerminal()) {
+                                List<Symbol> prod3 = producao2_.subList(1, producao2_.size());
+                                first.addAll(gerarFirst(prod3.get(0)));
+                            } else {
+                                first.add(producao2_.get(1));
+                            }
+                        }
                     }
                 }
+                //CHECA SE O PROXIMO TAMBÉM É NAO TERMINAL
+                // SE FOR NAO TERMINAL, PEGA O FIRST DELE
+                if(producao.size()>1) {
+                    if (!producao.get(1).isTerminal()) {
+                        List<Symbol> prod2 = producao.subList(1, producao.size());
+                        System.out.println("Gerando FIRST(" + prod2.get(0).toString() + ")");
+                        first.addAll(gerarFirst(prod2.get(0)));
+                        if(producao.size()>2) {
+                            if (!producao.get(2).isTerminal()) {
+                                List<Symbol> prod3 = producao.subList(2, producao.size());
+                                System.out.println("Gerando FIRST(" + prod3.get(0).toString() + ")");
+                                first.addAll(gerarFirst(prod3.get(0)));
+                                if(producao.size()>3) {
+                                    if (!producao.get(3).isTerminal()) {
+                                        List<Symbol> prod4 = producao.subList(3, producao.size());
+                                        System.out.println("Gerando FIRST(" + prod4.get(0).toString() + ")");
+                                        first.addAll(gerarFirst(prod3.get(0)));
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
-
         return first;
     }
+
 
 
 
