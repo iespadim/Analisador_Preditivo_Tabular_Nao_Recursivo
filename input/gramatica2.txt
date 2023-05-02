@@ -1,7 +1,7 @@
-G = ({X, Y, Z},{a, b, c, d, e}, P, S)
+G = ({X, Y, Z, S},{a, b, c, d, e, f}, P, S)
 P: {
     S -> XYZ
-    X -> aXb | ε
+    X -> aXb | E
     Y -> cYZcX | d
     Z -> eZYe | f
 }

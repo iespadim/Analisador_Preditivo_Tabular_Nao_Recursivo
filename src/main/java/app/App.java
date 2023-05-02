@@ -13,11 +13,22 @@ public class App {
         desenhaApp();
         montaGramatica();
         verificaGramaticaLL();
+        criaConjuntoFirstEFollow();
+
+    }
+
+    private static void criaConjuntoFirstEFollow() {
+        gramatica.gerarFirst();
+//        //gramatica.calcularConjuntoFollow();
+        gramatica.exibirFirstFollow();
     }
 
     private static void verificaGramaticaLL() {
         if(gramatica.verificaGramaticaLL()){
             System.out.println("Gramatica é LL");
+        }else {
+            System.out.println("Gramatica não é LL");
+            System.exit(0);
         }
     }
 
