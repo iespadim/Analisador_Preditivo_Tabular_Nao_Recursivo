@@ -1,5 +1,7 @@
 package negocio;
 
+import lombok.Getter;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,12 +19,19 @@ public class Gramatica {
      * S) símbolo inicial da gramática
      */
 
+    @Getter
     String simboloGramatica;
+    @Getter
     ArrayList<Symbol> naoTerminais;
+    @Getter
     ArrayList<Symbol> terminais;
+    @Getter
+    TabelaPreditiva tabelaPreditiva;
 
-    HashMap<String, List<Symbol>> conjuntoFirst;
-    HashMap<String, List<Symbol>> conjuntoFollow;
+    @Getter
+    public HashMap<String, List<Symbol>> conjuntoFirst;
+    @Getter
+    public HashMap<String, List<Symbol>> conjuntoFollow;
 
     HashMap<String, ArrayList<List<Symbol>>> producoes;
     // hashmap onde cada chave tem diversas produção;
@@ -39,7 +48,6 @@ public class Gramatica {
         conjuntoFirst = new HashMap<String, List<Symbol>>();
         conjuntoFollow = new HashMap<String, List<Symbol>>();
         inicializaFirstFollow();
-
     }
 
     private void inicializaFirstFollow() {
@@ -80,6 +88,7 @@ public class Gramatica {
             for (String terminal : terminalsArray) {
                 terminais.add(new Symbol(terminal, true));
             }
+            terminais.add(new Symbol("$", true));
 
             System.out.println("Productions: " + productions);
             validaProducoes(lines);
@@ -228,12 +237,14 @@ public class Gramatica {
 
 
 
-    public void gerarFirst() {
+    public HashMap<String, List<Symbol>> gerarFirst() {
         // percorre os não-terminais
         for (Symbol naoTerminal : naoTerminais) {
             conjuntoFirst.put(naoTerminal.toString(), gerarFirst(naoTerminal));
             //gerarFirst(naoTerminal);
         }
+
+        return conjuntoFirst;
     }
 
     private List<Symbol> gerarFirst(Symbol naoTerminal) {
@@ -268,18 +279,15 @@ public class Gramatica {
     }
 
 
-
-
     public void gerarFollow() {
-        // Inicializa o conjunto FOLLOW do símbolo inicial com o símbolo delimitador $
         conjuntoFollow.get(simboloInicial).add(new Symbol("$", true));
 
         boolean mudou;
-        int maxIteracoes = 10; // Define o limite máximo de iterações
+        int maxIteracoes = 10;
         int iteracaoAtual = 0;
         do {
             mudou = false;
-            iteracaoAtual++; // Incrementa a contagem de iterações
+            iteracaoAtual++;
             for (Symbol naoTerminal : naoTerminais) {
                 ArrayList<List<Symbol>> producoesNaoTerminal = producoes.get(naoTerminal.toString());
                 for (List<Symbol> producao : producoesNaoTerminal) {
@@ -309,7 +317,7 @@ public class Gramatica {
                     }
                 }
             }
-            // Interrompe o loop se o limite máximo de iterações for atingido
+            // interrompe o loop se o limite máximo de iteracões for atingido
             if (iteracaoAtual >= maxIteracoes) {
                 System.out.println("Limite máximo de iterações atingido. Interrompendo o loop.");
                 break;
@@ -323,6 +331,66 @@ public class Gramatica {
         }
     }
 
+
+    public TabelaPreditiva montarTabelaPreditivaTabular() {
+        tabelaPreditiva = new TabelaPreditiva();
+        if (!terminais.contains(new Symbol("$", true))) {
+            terminais.add(new Symbol("$", true));
+        }
+
+        for (Symbol naoTerminal : naoTerminais) {
+            ArrayList<List<Symbol>> producoesNaoTerminal = producoes.get(naoTerminal.toString());
+            for (List<Symbol> producao : producoesNaoTerminal) {
+                List<Symbol> first = gerarFirstDaProducao(producao);
+
+                for (Symbol simboloFirst : first) {
+                    if (!simboloFirst.equals(EPSILON)) {
+                        tabelaPreditiva.addRegra(naoTerminal, simboloFirst, producao);
+                    }
+                }
+
+                if (first.contains(EPSILON)) {
+                    List<Symbol> followNaoTerminal = conjuntoFollow.get(naoTerminal.toString());
+                    for (Symbol simboloFollow : followNaoTerminal) {
+                        if (!tabelaPreditiva.contemRegra(naoTerminal, simboloFollow)) {
+                            tabelaPreditiva.addRegra(naoTerminal, simboloFollow, producao);
+                        }
+                    }
+                }
+            }
+        }
+
+        return tabelaPreditiva;
+    }
+
+
+    public List<Symbol> gerarFirstDaProducao(List<Symbol> producao) {
+        List<Symbol> first = new LinkedList<>();
+
+        int pos = 0;
+        boolean shouldContinue = true;
+
+        while (pos < producao.size() && shouldContinue) {
+            Symbol currentSymbol = producao.get(pos);
+
+            if (currentSymbol.isTerminal() || currentSymbol.equals(EPSILON)) {
+                first.add(currentSymbol);
+                shouldContinue = false;
+            } else {
+                List<Symbol> firstOfCurrentSymbol = conjuntoFirst.get(currentSymbol.toString());
+
+                if (firstOfCurrentSymbol.contains(EPSILON)) {
+                    first.addAll(firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON)).collect(Collectors.toList()));
+                } else {
+                    first.addAll(firstOfCurrentSymbol);
+                    shouldContinue = false;
+                }
+            }
+            pos++;
+        }
+
+        return first;
+    }
 
 
 }

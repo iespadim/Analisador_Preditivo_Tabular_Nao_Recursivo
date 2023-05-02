@@ -14,13 +14,26 @@ public class App {
         montaGramatica();
         verificaGramaticaLL();
         criaConjuntoFirstEFollow();
+        montarTabelaPreditivaTabular();
+        desenhaTabela();
+    }
 
+    private static void desenhaTabela() {
+        SwingUtilities.invokeLater(() -> {
+            TabelaPreditivaUI frame = new TabelaPreditivaUI(gramatica);
+            frame.setVisible(true);
+        });
+    }
+
+    private static void montarTabelaPreditivaTabular() {
+        gramatica.montarTabelaPreditivaTabular();
     }
 
     private static void criaConjuntoFirstEFollow() {
         gramatica.gerarFirst();
         gramatica.gerarFollow();
         gramatica.exibirFirstFollow();
+
     }
 
     private static void verificaGramaticaLL() {

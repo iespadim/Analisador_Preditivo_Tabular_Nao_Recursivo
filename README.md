@@ -50,10 +50,10 @@ roteiro de execução do programa
 * verificar se é LL ✔
   * verificar se nao possui recursao a esquerda✔
   * verificar se é fatoravel ✔
-* criar conjuntos first e follow
-* montar tabela preditiva tabular
-  * criar uma tabela sendo as linhas os nao terminais e as colunas os terminais + $
-  * preencher a tabelas com first e follow
+* criar conjuntos first e follow ✔
+* montar tabela preditiva tabular ✔
+  * criar uma tabela sendo as linhas os nao terminais e as colunas os terminais + $ ✔
+  * preencher a tabelas com first e follow ✔ 👀 atenção ao $ na tabela. está incompleto
 * mostrar a tabela de analise preditiva
   * main - le sentença
   * Inicie a pilha com o símbolo de início da gramática e um símbolo $.
