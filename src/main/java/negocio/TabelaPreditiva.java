@@ -1,10 +1,13 @@
 package negocio;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.List;
 
 public class TabelaPreditiva {
-    private HashMap<Symbol, HashMap<Symbol, List<Symbol>>> tabela;
+    @Getter
+    public static HashMap<Symbol, HashMap<Symbol, List<Symbol>>> tabela;
 
     public TabelaPreditiva() {
         tabela = new HashMap<>();
@@ -19,7 +22,23 @@ public class TabelaPreditiva {
     }
 
     public List<Symbol> getProducao(Symbol naoTerminal, Symbol terminal) {
-        return tabela.get(naoTerminal).get(terminal);
+//        HashMap<Symbol, List<Symbol>> aux2 = tabela.get(naoTerminal);
+//        System.out.println(aux2);
+//        System.out.println(tabela.containsKey(naoTerminal.toString()));
+////        System.out.println(tabela.containsKey());
+//        HashMap<Symbol, List<Symbol>> aux = tabela.get(naoTerminal.toString());
+//        List<Symbol> aux = aux.get(terminal);
+//        System.out.println(aux);
+        for (Symbol naoTerminalDaTabela : tabela.keySet()) {
+            if (naoTerminalDaTabela.equals(naoTerminal)) {
+                for (Symbol terminalDaTabela : tabela.get(naoTerminalDaTabela).keySet()) {
+                    if (terminalDaTabela.equals(terminal)) {
+                        return tabela.get(naoTerminalDaTabela).get(terminalDaTabela);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public boolean contemRegra(Symbol naoTerminal, Symbol simboloFollow) {

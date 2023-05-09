@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public class Gramatica {
     /**
@@ -29,6 +30,7 @@ public class Gramatica {
     @Getter
     ArrayList<Symbol> terminais;
     @Getter
+    @Setter
     TabelaPreditiva tabelaPreditiva;
 
     @Getter
@@ -399,6 +401,7 @@ public class Gramatica {
 
         int i = 0;
         while (!pilha.isEmpty()) {
+
             System.out.println("Pilha: " + pilha);
             // Remove o topo da pilha
             Symbol topo = pilha.removeLast();
