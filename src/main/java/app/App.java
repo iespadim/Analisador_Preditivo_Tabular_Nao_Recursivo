@@ -1,13 +1,15 @@
 package app;
 
-import negocio.Gramatica;
-
-import javax.swing.*;
 import java.util.concurrent.CountDownLatch;
+
+import javax.swing.SwingUtilities;
+
+import negocio.Gramatica;
 
 public class App {
     private static Gramatica gramatica;
     static String stringGramatica = "";
+    public static final String ENTRADA = "i+i*i";
 
     public static void main(String[] args) {
         desenhaApp();
@@ -15,14 +17,7 @@ public class App {
         verificaGramaticaLL();
         criaConjuntoFirstEFollow();
         montarTabelaPreditivaTabular();
-        desenhaTabela();
-    }
-
-    private static void desenhaTabela() {
-        SwingUtilities.invokeLater(() -> {
-            TabelaPreditivaUI frame = new TabelaPreditivaUI(gramatica);
-            frame.setVisible(true);
-        });
+        analisarEntrada();
     }
 
     private static void montarTabelaPreditivaTabular() {
@@ -37,9 +32,9 @@ public class App {
     }
 
     private static void verificaGramaticaLL() {
-        if(gramatica.verificaGramaticaLL()){
+        if (gramatica.verificaGramaticaLL()) {
             System.out.println("Gramatica é LL");
-        }else {
+        } else {
             System.out.println("Gramatica não é LL");
             System.exit(0);
         }
@@ -47,6 +42,15 @@ public class App {
 
     private static void montaGramatica() {
         gramatica = new Gramatica(stringGramatica);
+    }
+
+    private static void analisarEntrada() {
+        System.out.println("Analisando entrada: " + ENTRADA);
+        if (gramatica.analisarEntrada(ENTRADA)) {
+            System.out.println("Entrada aceita");
+        } else {
+            System.out.println("Entrada rejeitada");
+        }
     }
 
     public static void desenhaApp() {

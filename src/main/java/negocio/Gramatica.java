@@ -1,13 +1,16 @@
 package negocio;
 
-import lombok.Getter;
+import static negocio.Symbol.EPSILON;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static negocio.Symbol.EPSILON;
+import lombok.Getter;
 
 public class Gramatica {
     /**
@@ -95,7 +98,7 @@ public class Gramatica {
 
             System.out.println("Start symbol: " + startSymbol);
             simboloInicial = startSymbol;
-//            naoTerminais.add(startSymbol);
+            // naoTerminais.add(startSymbol);
         } else {
             System.out.println("Invalid grammar string");
         }
@@ -107,14 +110,16 @@ public class Gramatica {
             producoes.put(naoTerminal.toString(), new ArrayList<List<Symbol>>());
         }
 
-        // Cria uma lista com todos os símbolos e ordena pelo tamanho em ordem decrescente
+        // Cria uma lista com todos os símbolos e ordena pelo tamanho em ordem
+        // decrescente
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.addAll(terminais);
         allSymbols.addAll(naoTerminais);
         allSymbols.add(EPSILON);
         allSymbols.sort((s1, s2) -> Integer.compare(s2.toString().length(), s1.toString().length()));
 
-        // Para linhas >2, analisa cada produção e adiciona ao seu não-terminal no hashmap
+        // Para linhas >2, analisa cada produção e adiciona ao seu não-terminal no
+        // hashmap
         for (int i = 2; i < lines.length - 1; i++) {
             // Produção de cada linha
             String[] production = lines[i].split("->");
@@ -178,7 +183,7 @@ public class Gramatica {
     public boolean verificaGramaticaLL() {
         boolean temRecursaoEsquerda = verificaRecursaoEsquerda();
         boolean eFatoravel = verificaFatoravel();
-        //boolean eFatoravel = false;
+        // boolean eFatoravel = false;
 
         if (temRecursaoEsquerda || eFatoravel) {
             if (temRecursaoEsquerda) {
@@ -220,28 +225,25 @@ public class Gramatica {
         return false;
     }
 
-
-
-
     public void exibirFirstFollow() {
         System.out.println("Conjuntos FIRST:");
         for (Symbol naoTerminal : naoTerminais) {
-            System.out.println("FIRST(" + naoTerminal.toString() + "): " + conjuntoFirst.get(naoTerminal.toString()).toString());
+            System.out.println(
+                    "FIRST(" + naoTerminal.toString() + "): " + conjuntoFirst.get(naoTerminal.toString()).toString());
         }
 
         System.out.println("\nConjuntos FOLLOW:");
         for (Symbol naoTerminal : naoTerminais) {
-            System.out.println("FOLLOW(" + naoTerminal.toString() + "): " + conjuntoFollow.get(naoTerminal.toString()).toString());
+            System.out.println(
+                    "FOLLOW(" + naoTerminal.toString() + "): " + conjuntoFollow.get(naoTerminal.toString()).toString());
         }
     }
-
-
 
     public HashMap<String, List<Symbol>> gerarFirst() {
         // percorre os não-terminais
         for (Symbol naoTerminal : naoTerminais) {
             conjuntoFirst.put(naoTerminal.toString(), gerarFirst(naoTerminal));
-            //gerarFirst(naoTerminal);
+            // gerarFirst(naoTerminal);
         }
 
         return conjuntoFirst;
@@ -266,7 +268,8 @@ public class Gramatica {
                     List<Symbol> firstOfCurrentSymbol = gerarFirst(currentSymbol);
 
                     if (firstOfCurrentSymbol.contains(EPSILON)) {
-                        first.addAll(firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON)).collect(Collectors.toList()));
+                        first.addAll(firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON))
+                                .collect(Collectors.toList()));
                     } else {
                         first.addAll(firstOfCurrentSymbol);
                         shouldContinue = false;
@@ -277,7 +280,6 @@ public class Gramatica {
         }
         return first;
     }
-
 
     public void gerarFollow() {
         conjuntoFollow.get(simboloInicial).add(new Symbol("$", true));
@@ -302,7 +304,9 @@ public class Gramatica {
                                     followSimbolo.add(proxSimbolo);
                                 } else {
                                     List<Symbol> firstProxSimbolo = conjuntoFirst.get(proxSimbolo.toString());
-                                    followSimbolo.addAll(firstProxSimbolo.stream().filter(s -> !s.toString().equals(EPSILON.toString())).collect(Collectors.toList()));
+                                    followSimbolo.addAll(firstProxSimbolo.stream()
+                                            .filter(s -> !s.toString().equals(EPSILON.toString()))
+                                            .collect(Collectors.toList()));
                                     if (firstProxSimbolo.toString().contains(EPSILON.toString())) {
                                         followSimbolo.addAll(conjuntoFollow.get(proxSimbolo.toString()));
                                     }
@@ -324,19 +328,15 @@ public class Gramatica {
             }
         } while (mudou);
 
-        //remove duplicados do conjunto follow
+        // remove duplicados do conjunto follow
         for (Symbol naoTerminal : naoTerminais) {
             List<Symbol> follow = conjuntoFollow.get(naoTerminal.toString());
             conjuntoFollow.put(naoTerminal.toString(), follow.stream().distinct().collect(Collectors.toList()));
         }
     }
 
-
     public TabelaPreditiva montarTabelaPreditivaTabular() {
         tabelaPreditiva = new TabelaPreditiva();
-        if (!terminais.contains(new Symbol("$", true))) {
-            terminais.add(new Symbol("$", true));
-        }
 
         for (Symbol naoTerminal : naoTerminais) {
             ArrayList<List<Symbol>> producoesNaoTerminal = producoes.get(naoTerminal.toString());
@@ -346,13 +346,9 @@ public class Gramatica {
                 for (Symbol simboloFirst : first) {
                     if (!simboloFirst.equals(EPSILON)) {
                         tabelaPreditiva.addRegra(naoTerminal, simboloFirst, producao);
-                    }
-                }
-
-                if (first.contains(EPSILON)) {
-                    List<Symbol> followNaoTerminal = conjuntoFollow.get(naoTerminal.toString());
-                    for (Symbol simboloFollow : followNaoTerminal) {
-                        if (!tabelaPreditiva.contemRegra(naoTerminal, simboloFollow)) {
+                    } else {
+                        List<Symbol> followNaoTerminal = conjuntoFollow.get(naoTerminal.toString());
+                        for (Symbol simboloFollow : followNaoTerminal) {
                             tabelaPreditiva.addRegra(naoTerminal, simboloFollow, producao);
                         }
                     }
@@ -360,9 +356,10 @@ public class Gramatica {
             }
         }
 
+        System.out.println("\n\nTabela Preditiva Tabular: ");
+        System.out.println(tabelaPreditiva);
         return tabelaPreditiva;
     }
-
 
     public List<Symbol> gerarFirstDaProducao(List<Symbol> producao) {
         List<Symbol> first = new LinkedList<>();
@@ -380,7 +377,8 @@ public class Gramatica {
                 List<Symbol> firstOfCurrentSymbol = conjuntoFirst.get(currentSymbol.toString());
 
                 if (firstOfCurrentSymbol.contains(EPSILON)) {
-                    first.addAll(firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON)).collect(Collectors.toList()));
+                    first.addAll(
+                            firstOfCurrentSymbol.stream().filter(s -> !s.equals(EPSILON)).collect(Collectors.toList()));
                 } else {
                     first.addAll(firstOfCurrentSymbol);
                     shouldContinue = false;
@@ -392,6 +390,54 @@ public class Gramatica {
         return first;
     }
 
+    public boolean analisarEntrada(String entrada) {
+        // Inicializa a pilha com o símbolo inicial e o fim de pilha ($)
+        LinkedList<Symbol> pilha = new LinkedList<>();
 
+        pilha.add(new Symbol("$", true));
+        pilha.add(new Symbol(simboloInicial, false));
+
+        int i = 0;
+        while (!pilha.isEmpty()) {
+            System.out.println("Pilha: " + pilha);
+            // Remove o topo da pilha
+            Symbol topo = pilha.removeLast();
+            System.out.println("Topo: " + topo);
+
+            // Se o topo for um terminal
+            if (topo.isTerminal()) {
+                System.out.println("Topo é terminal");
+                // Se o topo for igual ao próximo símbolo da entrada
+                if (topo.toString().equals(Character.toString(entrada.charAt(i)))) {
+                    // Avança a entrada
+                    i++;
+                } else {
+                    // A entrada não é reconhecida pela gramática
+                    return false;
+                }
+            } else { // Senão, o topo é um não-terminal
+                // Busca na tabela preditiva a produção a ser usada
+                System.out.println("Topo é não-terminal");
+                List<Symbol> producao = tabelaPreditiva.getProducao(topo,
+                        new Symbol(String.valueOf(entrada.charAt(i)), false));
+
+                System.out.println("Produção: " + producao);
+
+                // Se não houver produção para o símbolo atual
+                if (producao == null) {
+                    // A entrada não é reconhecida pela gramática
+                    return false;
+                }
+
+                // Se houver produção, adiciona os símbolos da produção na pilha (em ordem
+                // inversa)
+                for (int j = producao.size() - 1; j >= 0; j--) {
+                    pilha.add(producao.get(j));
+                }
+            }
+        }
+
+        // Se a entrada foi completamente reconhecida pela gramática, retorna true
+        return true;
+    }
 }
-

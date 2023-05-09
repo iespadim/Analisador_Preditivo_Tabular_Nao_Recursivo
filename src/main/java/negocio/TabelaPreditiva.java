@@ -18,6 +18,10 @@ public class TabelaPreditiva {
         return tabela.getOrDefault(naoTerminal, new HashMap<>()).get(terminal);
     }
 
+    public List<Symbol> getProducao(Symbol naoTerminal, Symbol terminal) {
+        return tabela.get(naoTerminal).get(terminal);
+    }
+
     public boolean contemRegra(Symbol naoTerminal, Symbol simboloFollow) {
         for (Symbol terminal : tabela.get(naoTerminal).keySet()) {
             if (terminal.equals(simboloFollow)) {
@@ -25,5 +29,21 @@ public class TabelaPreditiva {
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Symbol naoTerminal : tabela.keySet()) {
+            sb.append(naoTerminal).append(":\n");
+            for (Symbol terminal : tabela.get(naoTerminal).keySet()) {
+                sb.append("\t").append(terminal).append(" -> ");
+                for (Symbol simbolo : tabela.get(naoTerminal).get(terminal)) {
+                    sb.append(simbolo).append(" ");
+                }
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 }
