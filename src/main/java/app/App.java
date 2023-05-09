@@ -1,5 +1,6 @@
 package app;
 
+import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.SwingUtilities;
@@ -9,7 +10,6 @@ import negocio.Gramatica;
 public class App {
     private static Gramatica gramatica;
     static String stringGramatica = "";
-    public static final String ENTRADA = "i+i*i";
 
     public static void main(String[] args) {
         desenhaApp();
@@ -45,12 +45,22 @@ public class App {
     }
 
     private static void analisarEntrada() {
-        System.out.println("Analisando entrada: " + ENTRADA);
-        if (gramatica.analisarEntrada(ENTRADA)) {
-            System.out.println("Entrada aceita");
-        } else {
-            System.out.println("Entrada rejeitada");
+        Scanner ler = new Scanner(System.in);
+
+        String entrada = "";
+        while (entrada != "sair") {
+            System.out.printf("\n(Exemplo: i+i*i )\nInforme uma entrada: ");
+            entrada = ler.nextLine();
+
+            System.out.println("Analisando entrada: " + entrada);
+            if (gramatica.analisarEntrada(entrada)) {
+                System.out.println("\nEntrada aceita");
+            } else {
+                System.out.println("\nEntrada rejeitada");
+            }
         }
+
+        ler.close();
     }
 
     public static void desenhaApp() {

@@ -396,20 +396,21 @@ public class Gramatica {
         // Inicializa a pilha com o símbolo inicial e o fim de pilha ($)
         LinkedList<Symbol> pilha = new LinkedList<>();
 
+        entrada += "$";
+
         pilha.add(new Symbol("$", true));
         pilha.add(new Symbol(simboloInicial, false));
 
         int i = 0;
         while (!pilha.isEmpty()) {
-
-            System.out.println("Pilha: " + pilha);
+            System.out.println("\n\nPilha: " + pilha);
+            System.out.print("Entrada: " + entrada.substring(i));
             // Remove o topo da pilha
             Symbol topo = pilha.removeLast();
-            System.out.println("Topo: " + topo);
+            System.out.print("  |  Produção: " + topo + " -> ");
 
             // Se o topo for um terminal
             if (topo.isTerminal()) {
-                System.out.println("Topo é terminal");
                 // Se o topo for igual ao próximo símbolo da entrada
                 if (topo.toString().equals(Character.toString(entrada.charAt(i)))) {
                     // Avança a entrada
@@ -420,11 +421,10 @@ public class Gramatica {
                 }
             } else { // Senão, o topo é um não-terminal
                 // Busca na tabela preditiva a produção a ser usada
-                System.out.println("Topo é não-terminal");
                 List<Symbol> producao = tabelaPreditiva.getProducao(topo,
                         new Symbol(String.valueOf(entrada.charAt(i)), false));
 
-                System.out.println("Produção: " + producao);
+                System.out.print(producao);
 
                 // Se não houver produção para o símbolo atual
                 if (producao == null) {
@@ -435,7 +435,9 @@ public class Gramatica {
                 // Se houver produção, adiciona os símbolos da produção na pilha (em ordem
                 // inversa)
                 for (int j = producao.size() - 1; j >= 0; j--) {
-                    pilha.add(producao.get(j));
+                    if (producao.get(j) != EPSILON) {
+                        pilha.add(producao.get(j));
+                    }
                 }
             }
         }
